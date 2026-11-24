@@ -837,7 +837,10 @@ const V=(function(){
     $('who').textContent=worker;
     ensureMonth();
     if(!sel||sel.slice(0,7)!==calMonth) sel=dayInMonth();
-    renderHero(); renderWeek(); renderCal(); renderDetail(); renderTotals(); renderReq(); renderSwaps(); renderAdm(); renderUpload();
+    let dn=document.getElementById('dbgNote'); if(!dn){ dn=document.createElement('p'); dn.id='dbgNote'; dn.className='hint'; document.querySelector('.wrap').appendChild(dn); }
+    try{ renderHero(); renderWeek(); renderCal(); renderDetail(); renderTotals(); renderReq(); renderSwaps(); renderAdm(); renderUpload(); dn.textContent=V.DAYS.length?'':'Çizelge yüklenmedi ('+(window.__snap||'bekleniyor')+'), yenileniyor…'; }
+    catch(e){ dn.textContent='Hata: '+(e&&e.message)+' | '+(window.__snap||''); }
+    if(!V.DAYS.length&&TOKEN) setTimeout(()=>pollNow(true),2500);
   }
 
   function setHash(n){
@@ -1384,6 +1387,7 @@ const V=(function(){
     if(!API||!TOKEN||pendingW||(polling&&!force)) return; polling=true;
     let r; try{ r=await api({a:'snap'}); } finally{ polling=false; }
     if(r.err==='auth'){ TOKEN=''; ME=null; store.set('vardiya-tok',''); if(DBR) DBR.clear(); wLoaded=true; wRecheck(); return; }
+    window.__snap=r.ok?'ok:'+Object.keys(r.docs||{}).join(','):'fail:'+(r.err||'?');
     if(!r.ok) return;
     ME=r.me; wLoaded=true; DBR.load(r.docs); mgrChanged(); wRecheck();
   }
