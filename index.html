@@ -1380,9 +1380,9 @@ const V=(function(){
       collection:c=>({ onSnapshot(f){ (cs[c]=cs[c]||[]).push(f); setTimeout(()=>f(sc(c)),0); } })
     };
   }
-  async function pollNow(){
-    if(!API||!TOKEN||pendingW||polling) return; polling=true;
-    const r=await api({a:'snap'}); polling=false;
+  async function pollNow(force){
+    if(!API||!TOKEN||pendingW||(polling&&!force)) return; polling=true;
+    let r; try{ r=await api({a:'snap'}); } finally{ polling=false; }
     if(r.err==='auth'){ TOKEN=''; ME=null; store.set('vardiya-tok',''); if(DBR) DBR.clear(); wLoaded=true; wRecheck(); return; }
     if(!r.ok) return;
     ME=r.me; wLoaded=true; DBR.load(r.docs); mgrChanged(); wRecheck();
@@ -1391,7 +1391,7 @@ const V=(function(){
     const r=await api({a:'verify',name:name,phone:phone});
     if(!r.ok) return r;
     TOKEN=r.token; store.set('vardiya-tok',TOKEN); ME={r:r.r,w:r.w}; wLoaded=true;
-    await pollNow(); return r;
+    await pollNow(true); return r;
   }
   /* ---------- worker identity check (server side) ---------- */
   let wFor=null, pendingCand=null, mineSubs={};
