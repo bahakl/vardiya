@@ -1,11 +1,11 @@
 /**
  * Vardiya backend (Google Apps Script project in the same Google account as the roster spreadsheet).
  * Deploy: Deploy > New deployment > Web app > Execute as: Me, Who has access: Anyone.
- * Tabs used: "eylul" (master roster), "İstekler" (written), "Yetkili telefonlar" (managers: Ad, Telefon, Not),
+ * Tabs used: "eylul" (master roster), "İstekler" (written), "Yetkili telefonlar" (managers: Ad), "Giriş kodları" (Rol, Ad, Kod; made by makeCodes()),
  * "Çalışan telefonları" (workers: Ad, Telefon), "_db" (hidden, created automatically; app data).
  */
 const TZ = 'Europe/Istanbul';
-const ROSTER_TAB = 'eylul', REQ_TAB = 'İstekler', MGR_TAB = 'Yetkili telefonlar', WRK_TAB = 'Çalışan telefonları', DB_TAB = '_db';
+const ROSTER_TAB = 'eylul', REQ_TAB = 'İstekler', MGR_TAB = 'Yetkili telefonlar', WRK_TAB = 'Çalışan telefonları', DB_TAB = '_db', CODE_TAB = 'Giriş kodları';
 const FROM_DATE = '2026-10-28';
 const TOKEN_DAYS = 90;
 
@@ -87,19 +87,28 @@ function rateFail_() {
   const c = CacheService.getScriptCache(), k = 'fail' + Utilities.formatDate(new Date(), TZ, 'yyyyMMddHH');
   c.put(k, String(Number(c.get(k) || 0) + 1), 3600);
 }
+function normCode_(c) { return String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+function readCodes_() {
+  const sh = ss_().getSheetByName(CODE_TAB); if (!sh) return [];
+  const v = sh.getDataRange().getDisplayValues(), out = [];
+  for (let i = 1; i < v.length; i++) {
+    const role = String(v[i][0] || '').trim().toLowerCase(), name = String(v[i][1] || '').trim(), code = normCode_(v[i][2]);
+    if (name && code.length >= 6) out.push({ mgr: role.indexOf('y') === 0, name: name, code: code });
+  }
+  return out;
+}
 function info_() {
   const w = readPhones_(WRK_TAB, true);
-  return { ok: true, names: w.map(function (x) { return x.name; }), open: !w.some(function (x) { return x.ph; }) };
+  return { ok: true, names: w.map(function (x) { return x.name; }), open: !readCodes_().length };
 }
 function verify_(req) {
   if (!rateOk_()) return { ok: false, err: 'rate' };
-  const digits = String(req.phone || '').replace(/\D/g, '').slice(-10), nm = String(req.name || '').trim();
+  const code = normCode_(req.code), nm = String(req.name || '').trim();
   const mk = function (r, w) { return { ok: true, r: r, w: w, token: sign_({ r: r, w: w, exp: Date.now() + TOKEN_DAYS * 864e5 }) }; };
-  if (digits.length === 10) {
-    const m = readPhones_(MGR_TAB).filter(function (x) { return x.ph === digits; })[0];
-    if (m) return mk('manager', nm || m.name);
-    const w = readPhones_(WRK_TAB).filter(function (x) { return x.ph === digits && (!nm || slug_(x.name) === slug_(nm)); })[0];
-    if (w) return mk('worker', w.name);
+  if (code.length >= 6) {
+    const hit = readCodes_().filter(function (x) { return x.code === code; })[0];
+    if (hit && hit.mgr) return mk('manager', nm || hit.name);
+    if (hit && (!nm || slug_(hit.name) === slug_(nm))) return mk('worker', hit.name);
     rateFail_(); return { ok: false, err: 'bad' };
   }
   const inf = info_();
@@ -257,4 +266,25 @@ function setup() {
   ScriptApp.newTrigger('syncAll').timeBased().everyHours(1).create();
   dbSheet_(); secret_();
   return 'roster days: ' + syncAll();
+}
+
+/** Run from the editor: creates/fills the "Giriş kodları" tab. Existing codes are kept; clear a cell and run again to issue a new code. */
+function makeCodes() {
+  const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const gen = function (n) {
+    const b = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, Utilities.getUuid() + Utilities.getUuid() + Math.random());
+    let o = ''; for (let i = 0; i < n; i++) o += A[(b[i] + 256) % 256 % A.length]; return o;
+  };
+  let sh = ss_().getSheetByName(CODE_TAB);
+  if (!sh) { sh = ss_().insertSheet(CODE_TAB); sh.appendRow(['Rol', 'Ad', 'Kod']); sh.getRange(1, 1, 1, 3).setFontWeight('bold'); }
+  const have = {}; const v = sh.getDataRange().getDisplayValues();
+  for (let i = 1; i < v.length; i++) if (v[i][1]) have[slug_(v[i][1]) + '|' + (String(v[i][0]).toLowerCase().indexOf('y') === 0 ? 'm' : 'w')] = i + 1;
+  const want = readPhones_(WRK_TAB, true).map(function (x) { return ['Çalışan', x.name, 6]; })
+    .concat(readPhones_(MGR_TAB, true).map(function (x) { return ['Yönetici', x.name, 10]; }));
+  want.forEach(function (w) {
+    const key = slug_(w[1]) + '|' + (w[0] === 'Yönetici' ? 'm' : 'w'), row = have[key];
+    if (row) { if (!normCode_(sh.getRange(row, 3).getValue())) sh.getRange(row, 3).setValue(gen(w[2])); }
+    else sh.appendRow([w[0], w[1], gen(w[2])]);
+  });
+  return 'codes: ' + readCodes_().length;
 }

@@ -363,7 +363,7 @@ table.pg{border-collapse:separate; border-spacing:2px; width:100%; min-width:560
   <section class="block panel" id="wGate" hidden>
     <h2 id="wgTitle"></h2>
     <p class="hint" id="wgHint"></p>
-    <input type="tel" id="wPhone" inputmode="tel" autocomplete="tel" placeholder="5xx xxx xx xx" aria-label="Phone">
+    <input type="text" id="wPhone" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="KOD" aria-label="Kod">
     <div class="up-row">
       <button type="button" class="btn" id="wgGo" data-i18n="wgGo"></button>
       <button type="button" class="chip" id="wgCancel" data-i18n="mgrCancel"></button>
@@ -374,7 +374,7 @@ table.pg{border-collapse:separate; border-spacing:2px; width:100%; min-width:560
   <section class="block panel" id="mgrGate" hidden>
     <h2 data-i18n="mgrTitle"></h2>
     <p class="hint" data-i18n="mgrHint"></p>
-    <input type="tel" id="mgrPhone" inputmode="tel" autocomplete="tel" placeholder="5xx xxx xx xx" aria-label="Phone">
+    <input type="text" id="mgrPhone" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="KOD" aria-label="Kod">
     <div class="up-row">
       <button type="button" class="btn" id="mgrGo" data-i18n="mgrUnlock"></button>
       <button type="button" class="chip" id="mgrCancel" data-i18n="mgrCancel"></button>
@@ -569,12 +569,12 @@ const V=(function(){
       upErrEmpty:'No days were found in the picture.', upErrWrite:'Saving failed. Try again.',
       upErrGeneric:'Something went wrong while reading. Try again.', upTooMany:'Pick at most {n} pictures.',
       reqTitle:'Your shifts for next week · {a} – {b}', reqHint:'Pick a shift for each day, then submit. You can change it and submit again.',
-      wgTitle:'Verify it is you: {n}', wgHint:'Enter the phone number registered for this name (without +90). You only do this once on this device.', wgGo:'Continue', wgBad:'That number is not registered for this name. Ask your manager.', wgWait:'One moment, loading\u2026', wgNoHash:'This browser cannot check phone numbers.', wgNet:'No connection to the server. Try again.',
+      wgTitle:'Verify it is you: {n}', wgHint:'Enter the login code your manager gave you. You only do this once on this device.', wgGo:'Continue', wgBad:'That number is not registered for this name. Ask your manager.', wgWait:'One moment, loading\u2026', wgNoHash:'This browser cannot check phone numbers.', wgNet:'No connection to the server. Try again.',
       swTitle:'Swap shifts', swHint:'Pick your shift, a colleague, and what they give back. When they accept, the roster updates.', swSend:'Send swap request', swPickDay:'Your shift…', swPickWho:'Colleague (by hours that day)…', swTake:'Just take over (no return shift)', swSame:'Same day swap: {x}', swNeed:'Choose your shift and a colleague.', swSent:'Request sent.', swErr:'Could not save. Try again.',
       swAccept:'Accept', swDecline:'Decline', swCancel:'Cancel', swIn:'{a} asks you: {d} you take {x}{back}', swBack:', you give {x} on {y}', swOut:'You → {b}: you give {x} on {d}{back}', swBack2:', you get {x} on {y}', swSt_open:'Waiting for colleague', swSt_accepted:'Waiting for manager', swSt_declined:'Declined', swSt_cancelled:'Cancelled', swSt_approved:'Done – roster updated', swSt_rejected:'Rejected', swSt_stale:'Roster changed — redo',
       swPatTitle:'Shift swaps', swPatHint:'Approve writes both changes into the roster, even if the colleague has not accepted yet.', swPatNone:'No swaps waiting.', swLine:'{a} ⇄ {b}: {x} on {d}{back}',
       rowMore:'Whole week…', rowAll:'Week: {x}', rowCopy:'Same as last week', rowClear:'Clear week',
-      mgrTitle:'Manager access', mgrHint:'Enter your phone number without +90. Only numbers on the allowed list can open Manager.', mgrUnlock:'Unlock', mgrCancel:'Cancel', mgrBad:'This number is not allowed.', mgrWait:'The list is still loading. Try again in a moment.', mgrNoHash:'This browser cannot check the number.',
+      mgrTitle:'Manager access', mgrHint:'Enter the manager login code.', mgrUnlock:'Unlock', mgrCancel:'Cancel', mgrBad:'This is not a manager code.', mgrWait:'The list is still loading. Try again in a moment.', mgrNoHash:'This browser cannot check the number.',
       depTitle:'Deputy managers', depHint:'While you are away, appoint a worker to manage. Enter their phone number without +90 and the last day.', depAdd:'Appoint', depNone:'No deputies.', depRemove:'Remove', depEnded:'ended', depUntil:'until {d}', depBadPhone:'Enter a full phone number (10 digits, without +90).', depBadDate:'Pick the last day.', patLock:'Lock this phone',
       patOpen:'Manager', patTitle:'Manager', patBack:'Back', patGrid:'Roster', patGridHint:'Tap a cell to change that worker’s shift. Changes are saved at once and everyone sees them.',
       patReqTitle:'Requests for {a} – {b}', patReqHint:'Approve puts the requested shifts into the roster. Reject leaves the roster as it is.', patNoReq:'No requests yet for this week.',
@@ -614,12 +614,12 @@ const V=(function(){
       upErrEmpty:'Fotoğrafta gün bulunamadı.', upErrWrite:'Kaydedilemedi. Tekrar dene.',
       upErrGeneric:'Okurken bir şey ters gitti. Tekrar dene.', upTooMany:'En fazla {n} fotoğraf seç.',
       reqTitle:'Gelecek hafta vardiyaların · {a} – {b}', reqHint:'Her gün için bir vardiya seç, sonra gönder. Değiştirip tekrar gönderebilirsin.',
-      wgTitle:'Sen olduğunu doğrula: {n}', wgHint:'Bu isim için kayıtlı telefon numaranı yaz (+90 olmadan). Bu cihazda sadece bir kez sorulur.', wgGo:'Devam', wgBad:'Bu numara bu isme kayıtlı değil. Yöneticine sor.', wgWait:'Bir saniye, yükleniyor…', wgNoHash:'Bu tarayıcı telefon numarasını kontrol edemiyor.', wgNet:'Sunucuya ulaşılamıyor. Tekrar dene.',
+      wgTitle:'Sen olduğunu doğrula: {n}', wgHint:'Yöneticinin sana verdiği giriş kodunu yaz. Bu cihazda sadece bir kez sorulur.', wgGo:'Devam', wgBad:'Kod yanlış. Yöneticine sor.', wgWait:'Bir saniye, yükleniyor…', wgNoHash:'Bu tarayıcı telefon numarasını kontrol edemiyor.', wgNet:'Sunucuya ulaşılamıyor. Tekrar dene.',
       swTitle:'Vardiya değişimi', swHint:'Kendi vardiyanı, bir arkadaşı ve karşılığını seç. Arkadaşın kabul edince çizelge güncellenir.', swSend:'Değişim isteği gönder', swPickDay:'Vardiyan…', swPickWho:'Arkadaş (o günün saatine göre)…', swTake:'Sadece devral (karşılık yok)', swSame:'Aynı gün değişim: {x}', swNeed:'Vardiyanı ve bir arkadaşı seç.', swSent:'İstek gönderildi.', swErr:'Kaydedilemedi. Tekrar dene.',
       swAccept:'Kabul et', swDecline:'Reddet', swCancel:'İptal', swIn:'{a} sana soruyor: {d} günü {x} vardiyasını sen alırsın{back}', swBack:', sen {y} günü {x} verirsin', swOut:'Sen → {b}: {d} günü {x} verirsin{back}', swBack2:', {y} günü {x} alırsın', swSt_open:'Arkadaş bekleniyor', swSt_accepted:'Yönetici bekleniyor', swSt_declined:'Reddedildi', swSt_cancelled:'İptal edildi', swSt_approved:'Tamam – çizelge güncellendi', swSt_rejected:'Yönetici reddetti', swSt_stale:'Çizelge değişti — yeniden iste',
       swPatTitle:'Vardiya değişimleri', swPatHint:'Onayla: iki değişiklik çizelgeye yazılır (arkadaş henüz kabul etmediyse bile).', swPatNone:'Bekleyen değişim yok.', swLine:'{a} ⇄ {b}: {d} günü {x}{back}',
       rowMore:'Tüm hafta…', rowAll:'Hafta: {x}', rowCopy:'Geçen haftayla aynı', rowClear:'Haftayı temizle',
-      mgrTitle:'Manager girişi', mgrHint:'Telefon numaranı +90 olmadan yaz. Manager’ı yalnızca izin verilen numaralar açabilir.', mgrUnlock:'Aç', mgrCancel:'Vazgeç', mgrBad:'Bu numaraya izin yok.', mgrWait:'Liste hâlâ yükleniyor. Biraz sonra tekrar dene.', mgrNoHash:'Bu tarayıcı numarayı kontrol edemiyor.',
+      mgrTitle:'Manager girişi', mgrHint:'Yönetici giriş kodunu yaz.', mgrUnlock:'Aç', mgrCancel:'Vazgeç', mgrBad:'Bu kod yönetici kodu değil.', mgrWait:'Liste hâlâ yükleniyor. Biraz sonra tekrar dene.', mgrNoHash:'Bu tarayıcı numarayı kontrol edemiyor.',
       depTitle:'Vekil yöneticiler', depHint:'Yokken yönetmesi için bir çalışanı görevlendir. Telefon numarasını +90 olmadan ve son günü yaz.', depAdd:'Görevlendir', depNone:'Vekil yok.', depRemove:'Kaldır', depEnded:'bitti', depUntil:'{d} tarihine kadar', depBadPhone:'Telefon numarasını tam yaz (10 hane, +90 olmadan).', depBadDate:'Son günü seç.', patLock:'Bu telefonu kilitle',
       patOpen:'Manager', patTitle:'Manager', patBack:'Geri', patGrid:'Çizelge', patGridHint:'Bir hücreye dokunup o kişinin vardiyasını değiştir. Değişiklik hemen kaydedilir, herkes görür.',
       patReqTitle:'{a} – {b} istekleri', patReqHint:'Onayla: istenen vardiyalar çizelgeye yazılır. Reddet: çizelge aynı kalır.', patNoReq:'Bu hafta için henüz istek yok.',
@@ -1403,7 +1403,7 @@ const V=(function(){
     ME=r.me; wLoaded=true; DBR.load(r.docs); mgrChanged(); wRecheck();
   }
   async function doVerify(name,phone){
-    const r=await api({a:'verify',name:name,phone:phone});
+    const r=await api({a:'verify',name:name,code:String(phone||'').trim()});
     if(!r.ok) return r;
     TOKEN=r.token; store.set('vardiya-tok',TOKEN); ME={r:r.r,w:r.w}; wLoaded=true;
     await pollNow(true); return r;
