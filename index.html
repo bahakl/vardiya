@@ -806,6 +806,7 @@ const V=(function(){
 
   function renderPicker(){
     const box=$('names'); box.innerHTML='';
+    if(!V.WORKERS.length){ const p=document.createElement('p'); p.className='hint'; p.textContent=window.__infoFail?'Bağlanılamadı, tekrar deneniyor…':'Yükleniyor…'; box.appendChild(p); }
     V.WORKERS.forEach(n=>{
       const b=document.createElement('button'); b.type='button'; b.textContent=n; b.dataset.name=n;
       if(n===worker) b.setAttribute('aria-current','true');
@@ -1475,7 +1476,10 @@ const V=(function(){
     setUid();
     if(!TOKEN) wLoaded=true;
     renderStatic();
-    const inf=await api({a:'info'});
+    renderPicker();
+    let inf=await api({a:'info'});
+    for(let k=0;!inf.ok&&k<8;k++){ window.__infoFail=true; renderPicker(); await new Promise(r=>setTimeout(r,2500)); inf=await api({a:'info'}); }
+    window.__infoFail=false;
     if(inf.ok){
       OPEN=!!inf.open; V.EXTRA=inf.names||[]; store.set('vardiya-names',JSON.stringify(V.EXTRA)); applyRoster();
       if(!worker&&!pendingCand){ const c=SLUG[(location.hash||'').slice(1)]; if(c) pendingCand=c; }
