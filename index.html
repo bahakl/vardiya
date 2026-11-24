@@ -775,7 +775,7 @@ const V=(function(){
     const nm=w=>'<span class="tm'+(w===worker?' me':'')+'">'+esc(w)+'</span>';
     let h='<div class="team"><h3 class="tm-h">'+esc(t('teamTitle'))+'</h3>';
     keys.forEach(k=>{ const g=groups[k]; h+='<div class="tm-row"><span class="pill '+kindClass(g.e)+'">'+esc(k)+'</span><div class="tm-names">'+g.names.map(nm).join('')+'</div></div>'; });
-    if(away.length) h+='<div class="tm-row"><span class="tm-away">'+esc(t('teamOff'))+'</span><div class="tm-names">'+away.map(a=>nm(a[0])).join('')+'</div></div>';
+    if(away.length) h+='<div class="tm-row"><span class="pill kOff">'+esc(t('teamOff'))+'</span><div class="tm-names">'+away.map(a=>nm(a[0])).join('')+'</div></div>';
     return h+'</div>';
   }
 
