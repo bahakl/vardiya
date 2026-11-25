@@ -572,8 +572,8 @@ const V=(function(){
       reqTitle:'Your shifts for next week · {a} – {b}', reqHint:'Pick a shift for each day, then submit. You can change it and submit again.',
       wgTitle:'Verify it is you: {n}', wgHint:'Enter the login code your manager gave you. You only do this once on this device.', wgGo:'Continue', wgBad:'That number is not registered for this name. Ask your manager.', wgWait:'One moment, loading\u2026', wgNoHash:'This browser cannot check phone numbers.', wgNet:'No connection to the server. Try again.',
       swTitle:'Swap shifts', swHint:'Pick your shift, a colleague, and what they give back. When they accept, the roster updates.', swSend:'Send swap request', swPickDay:'Your shift…', swPickWho:'Colleague (by hours that day)…', swTake:'Just take over (no return shift)', swSame:'Same day swap: {x}', swNeed:'Choose your shift and a colleague.', swSent:'Request sent.', swErr:'Could not save. Try again.',
-      swAccept:'Accept', swDecline:'Decline', swCancel:'Cancel', swIn:'{a} asks you: {d} you take {x}{back}', swBack:', you give {x} on {y}', swOut:'You → {b}: you give {x} on {d}{back}', swBack2:', you get {x} on {y}', swSt_open:'Waiting for colleague', swSt_accepted:'Waiting for manager', swSt_declined:'Declined', swSt_cancelled:'Cancelled', swSt_approved:'Done – roster updated', swSt_rejected:'Rejected', swSt_stale:'Roster changed — redo',
-      swPatTitle:'Shift swaps', swPatHint:'Approve writes both changes into the roster, even if the colleague has not accepted yet.', swPatNone:'No swaps waiting.', swLine:'{a} ⇄ {b}: {x} on {d}{back}',
+      swAccept:'Accept', swDecline:'Decline', swCancel:'Cancel', swIn:'{a} asks you: {d} you take {x}{back}', swBack:', you give {x} on {y}', swOut:'You → {b}: you give {x} on {d}{back}', swBack2:', you get {x} on {y}', swSt_open:'Waiting for colleague', swSt_accepted:'Accepted', swSt_declined:'Declined', swSt_cancelled:'Cancelled', swSt_approved:'Done – roster updated', swSt_rejected:'Rejected', swSt_stale:'Roster changed — redo',
+      swPatTitle:'Shift swaps', swPatHint:'Swaps need no approval: when the colleague accepts, the roster updates by itself. This list is for information.', swPatNone:'No upcoming swaps.', swLine:'{a} ⇄ {b}: {x} on {d}{back}',
       rowMore:'Whole week…', rowAll:'Week: {x}', rowCopy:'Same as last week', rowClear:'Clear week',
       mgrTitle:'Manager access', mgrHint:'Enter the manager login code.', mgrUnlock:'Unlock', mgrCancel:'Cancel', mgrBad:'This is not a manager code.', mgrWait:'The list is still loading. Try again in a moment.', mgrNoHash:'This browser cannot check the number.',
       depTitle:'Deputy managers', depHint:'While you are away, appoint a worker to manage. Enter their phone number without +90 and the last day.', depAdd:'Appoint', depNone:'No deputies.', depRemove:'Remove', depEnded:'ended', depUntil:'until {d}', depBadPhone:'Enter a full phone number (10 digits, without +90).', depBadDate:'Pick the last day.', patLock:'Log out',
@@ -617,8 +617,8 @@ const V=(function(){
       reqTitle:'Gelecek hafta vardiyaların · {a} – {b}', reqHint:'Her gün için bir vardiya seç, sonra gönder. Değiştirip tekrar gönderebilirsin.',
       wgTitle:'Sen olduğunu doğrula: {n}', wgHint:'Yöneticinin sana verdiği giriş kodunu yaz. Bu cihazda sadece bir kez sorulur.', wgGo:'Devam', wgBad:'Kod yanlış. Yöneticine sor.', wgWait:'Bir saniye, yükleniyor…', wgNoHash:'Bu tarayıcı telefon numarasını kontrol edemiyor.', wgNet:'Sunucuya ulaşılamıyor. Tekrar dene.',
       swTitle:'Vardiya değişimi', swHint:'Kendi vardiyanı, bir arkadaşı ve karşılığını seç. Arkadaşın kabul edince çizelge güncellenir.', swSend:'Değişim isteği gönder', swPickDay:'Vardiyan…', swPickWho:'Arkadaş (o günün saatine göre)…', swTake:'Sadece devral (karşılık yok)', swSame:'Aynı gün değişim: {x}', swNeed:'Vardiyanı ve bir arkadaşı seç.', swSent:'İstek gönderildi.', swErr:'Kaydedilemedi. Tekrar dene.',
-      swAccept:'Kabul et', swDecline:'Reddet', swCancel:'İptal', swIn:'{a} sana soruyor: {d} günü {x} vardiyasını sen alırsın{back}', swBack:', sen {y} günü {x} verirsin', swOut:'Sen → {b}: {d} günü {x} verirsin{back}', swBack2:', {y} günü {x} alırsın', swSt_open:'Arkadaş bekleniyor', swSt_accepted:'Yönetici bekleniyor', swSt_declined:'Reddedildi', swSt_cancelled:'İptal edildi', swSt_approved:'Tamam – çizelge güncellendi', swSt_rejected:'Yönetici reddetti', swSt_stale:'Çizelge değişti — yeniden iste',
-      swPatTitle:'Vardiya değişimleri', swPatHint:'Onayla: iki değişiklik çizelgeye yazılır (arkadaş henüz kabul etmediyse bile).', swPatNone:'Bekleyen değişim yok.', swLine:'{a} ⇄ {b}: {d} günü {x}{back}',
+      swAccept:'Kabul et', swDecline:'Reddet', swCancel:'İptal', swIn:'{a} sana soruyor: {d} günü {x} vardiyasını sen alırsın{back}', swBack:', sen {y} günü {x} verirsin', swOut:'Sen → {b}: {d} günü {x} verirsin{back}', swBack2:', {y} günü {x} alırsın', swSt_open:'Arkadaş bekleniyor', swSt_accepted:'Kabul edildi', swSt_declined:'Reddedildi', swSt_cancelled:'İptal edildi', swSt_approved:'Tamam – çizelge güncellendi', swSt_rejected:'Yönetici reddetti', swSt_stale:'Çizelge değişti — yeniden iste',
+      swPatTitle:'Vardiya değişimleri', swPatHint:'Değişim için onay gerekmez: arkadaş kabul edince çizelge kendiliğinden güncellenir. Bu liste sadece bilgi içindir.', swPatNone:'Yaklaşan değişim yok.', swLine:'{a} ⇄ {b}: {d} günü {x}{back}',
       rowMore:'Tüm hafta…', rowAll:'Hafta: {x}', rowCopy:'Geçen haftayla aynı', rowClear:'Haftayı temizle',
       mgrTitle:'Manager girişi', mgrHint:'Yönetici giriş kodunu yaz.', mgrUnlock:'Aç', mgrCancel:'Vazgeç', mgrBad:'Bu kod yönetici kodu değil.', mgrWait:'Liste hâlâ yükleniyor. Biraz sonra tekrar dene.', mgrNoHash:'Bu tarayıcı numarayı kontrol edemiyor.',
       depTitle:'Vekil yöneticiler', depHint:'Yokken yönetmesi için bir çalışanı görevlendir. Telefon numarasını +90 olmadan ve son günü yaz.', depAdd:'Görevlendir', depNone:'Vekil yok.', depRemove:'Kaldır', depEnded:'bitti', depUntil:'{d} tarihine kadar', depBadPhone:'Telefon numarasını tam yaz (10 hane, +90 olmadan).', depBadDate:'Son günü seç.', patLock:'Çıkış yap',
@@ -1321,16 +1321,14 @@ const V=(function(){
   }
   function renderPatSwaps(){
     const box=$('patSwaps'); if(!box) return; box.innerHTML='';
-    const list=swaps.filter(s=>(s.status==='accepted'||s.status==='open')&&s.d>=nowIst().date).sort((a,b)=>a.d<b.d?-1:1);
+    const today=nowIst().date;
+    const list=swaps.filter(s=>(s.status==='open'||s.status==='approved'||s.status==='accepted')&&(s.d>=today||(s.d2||s.d)>=today)).sort((a,b)=>a.d<b.d?-1:1);
     if(!list.length){ const p=document.createElement('p'); p.className='hint'; p.textContent=t('swPatNone'); box.appendChild(p); return; }
     list.forEach(sw=>{
       const row=document.createElement('div'); row.className='sw';
       const p=document.createElement('p'); p.textContent=swLine(sw,'mgr'); row.appendChild(p);
-      const tg=document.createElement('span'); tg.className='pr-st'; tg.style.justifySelf='start'; tg.textContent=t('swSt_'+sw.status); row.appendChild(tg);
-      const act=document.createElement('div'); act.className='up-row';
-      const ok=document.createElement('button'); ok.type='button'; ok.className='btn'; ok.textContent=t('patApprove'); ok.dataset.sm='ok'; ok.dataset.id=sw.id;
-      const no=document.createElement('button'); no.type='button'; no.className='chip'; no.textContent=t('patReject'); no.dataset.sm='no'; no.dataset.id=sw.id;
-      act.appendChild(ok); act.appendChild(no); row.appendChild(act); box.appendChild(row);
+      const tg=document.createElement('span'); tg.className='pr-st'+(sw.status==='approved'?' approved':''); tg.style.justifySelf='start'; tg.textContent=t('swSt_'+sw.status); row.appendChild(tg);
+      box.appendChild(row);
     });
   }
   async function swMgr(id,approve){
