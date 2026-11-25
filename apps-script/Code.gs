@@ -205,7 +205,7 @@ function readImg_(req) {
   const parts = [{ text: prompt }];
   imgs.forEach(function (b) { parts.push({ inline_data: { mime_type: 'image/jpeg', data: String(b) } }); });
   const body = JSON.stringify({ contents: [{ role: 'user', parts: parts }], generationConfig: { temperature: 0, responseMimeType: 'application/json' } });
-  const models = ['gemini-2.5-pro', 'gemini-2.5-flash'];
+  const models = ['gemini-3.5-flash', 'gemini-flash-latest', 'gemini-3-flash-preview', 'gemini-pro-latest'];
   let err = 'ai';
   for (let i = 0; i < models.length; i++) {
     let r;
