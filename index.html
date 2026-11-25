@@ -1182,7 +1182,7 @@ const V=(function(){
       const tr=document.createElement('tr'), th=document.createElement('th'); th.className='nm'; th.textContent=name;
       const rw=document.createElement('select'); rw.className='rw'; rw.setAttribute('aria-label',name+' · '+t('rowMore'));
       const r0=document.createElement('option'); r0.value=''; r0.textContent=t('rowMore'); rw.appendChild(r0);
-      const weeks=[]; for(let i=0;i<days.length;i+=7) weeks.push(days.slice(i,i+7));
+      const weeks=[days.slice(0,7)];
       weeks.forEach((wd,wi)=>{
         const g=weeks.length>1?document.createElement('optgroup'):rw;
         if(weeks.length>1){ g.label=dfmt(wd[0],{day:'numeric',month:'short'})+' – '+dfmt(wd[6],{day:'numeric',month:'short'}); rw.appendChild(g); }
