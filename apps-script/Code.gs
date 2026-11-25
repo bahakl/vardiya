@@ -1,17 +1,18 @@
 /**
  * Vardiya backend (Google Apps Script project in the same Google account as the roster spreadsheet).
  * Deploy: Deploy > New deployment > Web app > Execute as: Me, Who has access: Anyone.
- * Tabs used: "eylul" (master roster), "İstekler" (written), "Yöneticiler" (managers: Ad), "Giriş kodları" (Rol, Ad, Kod; made by makeCodes()),
+ * Tabs used: "Çizelge" (master roster), "İstekler" (written), "Yöneticiler" (managers: Ad), "Giriş kodları" (Rol, Ad, Kod; made by makeCodes()),
  * "Çalışanlar" (workers: Ad), "_db" (hidden, created automatically; app data).
  */
 const TZ = 'Europe/Istanbul';
-const ROSTER_TAB = 'eylul', REQ_TAB = 'İstekler', MGR_TAB = 'Yöneticiler', WRK_TAB = 'Çalışanlar', DB_TAB = '_db', CODE_TAB = 'Giriş kodları';
+const ROSTER_TAB = 'Çizelge', REQ_TAB = 'İstekler', MGR_TAB = 'Yöneticiler', WRK_TAB = 'Çalışanlar', DB_TAB = '_db', CODE_TAB = 'Giriş kodları';
 const FROM_DATE = '2026-10-28';
 const TOKEN_DAYS = 90;
 
 /* ---------- helpers ---------- */
 const SHEET_ID = 'PASTE_YOUR_SPREADSHEET_ID_HERE';
 function ss_() { return SpreadsheetApp.openById(SHEET_ID); }
+function rosterSheet_() { const s = ss_(); return s.getSheetByName(ROSTER_TAB) || s.getSheetByName('eylul'); }
 function slug_(n) {
   return String(n || '').replace(/İ/g, 'i').toLowerCase().replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g')
     .replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/[^a-z0-9]/g, '');
@@ -192,7 +193,7 @@ function doPost(e) {
 }
 
 /* ---------- picture -> sheet (manager only; needs Script Property GEMINI_KEY) ---------- */
-const BACKUP_TAB = 'eylul-yedek';
+const BACKUP_TAB = 'Çizelge-yedek';
 const COL_ICON = ['🌙', '🔋', '💻', '📌', '📱', '🌆', '💤', '🏖️', '🤒'];
 const GUN_ = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
 function isMgr_(req) { const me = auth_(req.token); return me && me.r === 'manager' ? me : null; }
@@ -241,8 +242,8 @@ function applyRoster_(req) {
   }
   const lock = LockService.getScriptLock(); lock.waitLock(30000);
   try {
-    const ss = ss_(), sh = ss.getSheetByName(ROSTER_TAB); if (!sh) return { ok: false, err: 'nosheet' };
-    const old = ss.getSheetByName(BACKUP_TAB); if (old) ss.deleteSheet(old);
+    const ss = ss_(), sh = rosterSheet_(); if (!sh) return { ok: false, err: 'nosheet' };
+    [BACKUP_TAB, 'eylul-yedek'].forEach(function (n) { const o = ss.getSheetByName(n); if (o) ss.deleteSheet(o); });
     const bk = sh.copyTo(ss); bk.setName(BACKUP_TAB); bk.hideSheet();
     const disp = sh.getDataRange().getDisplayValues(), at = {}, lastCol = Math.max(11, sh.getLastColumn());
     let lastDateRow = 1;
@@ -280,7 +281,7 @@ function undoRoster_(req) {
   if (!isMgr_(req)) return { ok: false, err: 'auth' };
   const lock = LockService.getScriptLock(); lock.waitLock(30000);
   try {
-    const ss = ss_(), sh = ss.getSheetByName(ROSTER_TAB), bk = ss.getSheetByName(BACKUP_TAB);
+    const ss = ss_(), sh = rosterSheet_(), bk = ss.getSheetByName(BACKUP_TAB) || ss.getSheetByName('eylul-yedek');
     if (!sh || !bk) return { ok: false, err: 'nobackup' };
     const v = bk.getDataRange().getValues();
     sh.getDataRange().clearContent();
@@ -298,7 +299,7 @@ function clean_(s) {
   }).filter(Boolean).join(',');
 }
 function syncRoster_() {
-  const sh = ss_().getSheetByName(ROSTER_TAB); if (!sh) return 0;
+  const sh = rosterSheet_(); if (!sh) return 0;
   const v = sh.getDataRange().getDisplayValues(), rows = {};
   for (let i = 1; i < v.length; i++) {
     const m = String(v[i][0]).trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/); if (!m) continue;
