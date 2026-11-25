@@ -5,7 +5,7 @@
  * "Çalışan telefonları" (workers: Ad, Telefon), "_db" (hidden, created automatically; app data).
  */
 const TZ = 'Europe/Istanbul';
-const ROSTER_TAB = 'eylul', REQ_TAB = 'İstekler', MGR_TAB = 'Yetkili telefonlar', WRK_TAB = 'Çalışanlar', DB_TAB = '_db', CODE_TAB = 'Giriş kodları';
+const ROSTER_TAB = 'eylul', REQ_TAB = 'İstekler', MGR_TAB = 'Yöneticiler', WRK_TAB = 'Çalışanlar', DB_TAB = '_db', CODE_TAB = 'Giriş kodları';
 const FROM_DATE = '2026-10-28';
 const TOKEN_DAYS = 90;
 
