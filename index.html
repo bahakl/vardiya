@@ -391,6 +391,7 @@ table.pg{border-collapse:separate; border-spacing:2px; width:100%; min-width:560
       <div class="tools">
         <button type="button" class="chip" id="patLang" hidden></button>
         <button type="button" class="chip" id="patBack" data-i18n="patBack"></button>
+        <button type="button" class="chip" id="patLock" data-i18n="patLock"></button>
       </div>
     </div>
     <div class="cal-head">
@@ -443,7 +444,6 @@ table.pg{border-collapse:separate; border-spacing:2px; width:100%; min-width:560
       </div>
       <p class="hint" id="depMsg" role="status"></p>
     </div>
-    <div class="up-row"><button type="button" class="chip" id="patLock" data-i18n="patLock"></button></div>
   </section>
 
   <section class="block" id="admBlock" hidden>
@@ -576,7 +576,7 @@ const V=(function(){
       swPatTitle:'Shift swaps', swPatHint:'Approve writes both changes into the roster, even if the colleague has not accepted yet.', swPatNone:'No swaps waiting.', swLine:'{a} ⇄ {b}: {x} on {d}{back}',
       rowMore:'Whole week…', rowAll:'Week: {x}', rowCopy:'Same as last week', rowClear:'Clear week',
       mgrTitle:'Manager access', mgrHint:'Enter the manager login code.', mgrUnlock:'Unlock', mgrCancel:'Cancel', mgrBad:'This is not a manager code.', mgrWait:'The list is still loading. Try again in a moment.', mgrNoHash:'This browser cannot check the number.',
-      depTitle:'Deputy managers', depHint:'While you are away, appoint a worker to manage. Enter their phone number without +90 and the last day.', depAdd:'Appoint', depNone:'No deputies.', depRemove:'Remove', depEnded:'ended', depUntil:'until {d}', depBadPhone:'Enter a full phone number (10 digits, without +90).', depBadDate:'Pick the last day.', patLock:'Lock this phone',
+      depTitle:'Deputy managers', depHint:'While you are away, appoint a worker to manage. Enter their phone number without +90 and the last day.', depAdd:'Appoint', depNone:'No deputies.', depRemove:'Remove', depEnded:'ended', depUntil:'until {d}', depBadPhone:'Enter a full phone number (10 digits, without +90).', depBadDate:'Pick the last day.', patLock:'Log out',
       patOpen:'Manager', patTitle:'Manager', patBack:'Back', patGrid:'Roster', patGridHint:'Tap a cell to change that worker’s shift. Changes are saved at once and everyone sees them.',
       patReqTitle:'Requests for {a} – {b}', patReqHint:'Approve puts the requested shifts into the roster. Reject leaves the roster as it is.', patNoReq:'No requests yet for this week.',
       patApprove:'Approve', patReject:'Reject', patAll:'Approve all waiting ({n})', stPending:'Waiting', stApproved:'Approved', stRejected:'Rejected', stUpdated:'Changed since', patSaved:'Saved.', patErr:'Could not save. Manager needs edit access.',
@@ -621,7 +621,7 @@ const V=(function(){
       swPatTitle:'Vardiya değişimleri', swPatHint:'Onayla: iki değişiklik çizelgeye yazılır (arkadaş henüz kabul etmediyse bile).', swPatNone:'Bekleyen değişim yok.', swLine:'{a} ⇄ {b}: {d} günü {x}{back}',
       rowMore:'Tüm hafta…', rowAll:'Hafta: {x}', rowCopy:'Geçen haftayla aynı', rowClear:'Haftayı temizle',
       mgrTitle:'Manager girişi', mgrHint:'Yönetici giriş kodunu yaz.', mgrUnlock:'Aç', mgrCancel:'Vazgeç', mgrBad:'Bu kod yönetici kodu değil.', mgrWait:'Liste hâlâ yükleniyor. Biraz sonra tekrar dene.', mgrNoHash:'Bu tarayıcı numarayı kontrol edemiyor.',
-      depTitle:'Vekil yöneticiler', depHint:'Yokken yönetmesi için bir çalışanı görevlendir. Telefon numarasını +90 olmadan ve son günü yaz.', depAdd:'Görevlendir', depNone:'Vekil yok.', depRemove:'Kaldır', depEnded:'bitti', depUntil:'{d} tarihine kadar', depBadPhone:'Telefon numarasını tam yaz (10 hane, +90 olmadan).', depBadDate:'Son günü seç.', patLock:'Bu telefonu kilitle',
+      depTitle:'Vekil yöneticiler', depHint:'Yokken yönetmesi için bir çalışanı görevlendir. Telefon numarasını +90 olmadan ve son günü yaz.', depAdd:'Görevlendir', depNone:'Vekil yok.', depRemove:'Kaldır', depEnded:'bitti', depUntil:'{d} tarihine kadar', depBadPhone:'Telefon numarasını tam yaz (10 hane, +90 olmadan).', depBadDate:'Son günü seç.', patLock:'Çıkış yap',
       patOpen:'Manager', patTitle:'Manager', patBack:'Geri', patGrid:'Çizelge', patGridHint:'Bir hücreye dokunup o kişinin vardiyasını değiştir. Değişiklik hemen kaydedilir, herkes görür.',
       patReqTitle:'{a} – {b} istekleri', patReqHint:'Onayla: istenen vardiyalar çizelgeye yazılır. Reddet: çizelge aynı kalır.', patNoReq:'Bu hafta için henüz istek yok.',
       patApprove:'Onayla', patReject:'Reddet', patAll:'Bekleyenlerin hepsini onayla ({n})', stPending:'Bekliyor', stApproved:'Onaylandı', stRejected:'Reddedildi', stUpdated:'Sonra değişti', patSaved:'Kaydedildi.', patErr:'Kaydedilemedi. Manager ekranı için düzenleme yetkisi gerekir.',
@@ -1524,7 +1524,7 @@ const V=(function(){
   $('mgrPhone').addEventListener('keydown',ev=>{ if(ev.key==='Enter') mgrUnlock(); });
   $('depAdd').addEventListener('click',depAdd);
   $('patDeps').addEventListener('click',ev=>{ const b=ev.target.closest('button[data-dep]'); if(b) depRemove(b.dataset.dep); });
-  $('patLock').addEventListener('click',()=>{ TOKEN=''; ME=null; store.set('vardiya-tok',''); if(DBR) DBR.clear(); closePat(); wRecheck(); });
+  $('patLock').addEventListener('click',()=>{ store.set('vardiya-tok',''); store.set('vardiya-worker',''); location.hash=''; location.reload(); });
   $('patBack').addEventListener('click',closePat);
   $('wgGo').addEventListener('click',wVerify); $('wgCancel').addEventListener('click',()=>{ $('wGate').hidden=true; renderApp(); });
   $('wPhone').addEventListener('keydown',ev=>{ if(ev.key==='Enter') wVerify(); });
