@@ -1,8 +1,8 @@
 /**
  * Vardiya backend (Google Apps Script project in the same Google account as the roster spreadsheet).
  * Deploy: Deploy > New deployment > Web app > Execute as: Me, Who has access: Anyone.
- * Tabs used: "eylul" (master roster), "İstekler" (written), "Yetkili telefonlar" (managers: Ad), "Giriş kodları" (Rol, Ad, Kod; made by makeCodes()),
- * "Çalışan telefonları" (workers: Ad, Telefon), "_db" (hidden, created automatically; app data).
+ * Tabs used: "eylul" (master roster), "İstekler" (written), "Yöneticiler" (managers: Ad), "Giriş kodları" (Rol, Ad, Kod; made by makeCodes()),
+ * "Çalışanlar" (workers: Ad), "_db" (hidden, created automatically; app data).
  */
 const TZ = 'Europe/Istanbul';
 const ROSTER_TAB = 'eylul', REQ_TAB = 'İstekler', MGR_TAB = 'Yöneticiler', WRK_TAB = 'Çalışanlar', DB_TAB = '_db', CODE_TAB = 'Giriş kodları';
@@ -10,7 +10,7 @@ const FROM_DATE = '2026-10-28';
 const TOKEN_DAYS = 90;
 
 /* ---------- helpers ---------- */
-const SHEET_ID = 'PUT_YOUR_SPREADSHEET_ID_HERE';
+const SHEET_ID = 'PASTE_YOUR_SPREADSHEET_ID_HERE';
 function ss_() { return SpreadsheetApp.openById(SHEET_ID); }
 function slug_(n) {
   return String(n || '').replace(/İ/g, 'i').toLowerCase().replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g')
@@ -184,8 +184,111 @@ function doPost(e) {
     if (req.a === 'verify') return out_(verify_(req));
     if (req.a === 'snap') return out_(snap_(req));
     if (req.a === 'set') return out_(write_(req));
+    if (req.a === 'readimg') return out_(readImg_(req));
+    if (req.a === 'applyroster') return out_(applyRoster_(req));
+    if (req.a === 'undoroster') return out_(undoRoster_(req));
     return out_({ ok: false, err: 'op' });
   } catch (err) { return out_({ ok: false, err: 'server' }); }
+}
+
+/* ---------- picture -> sheet (manager only; needs Script Property GEMINI_KEY) ---------- */
+const BACKUP_TAB = 'eylul-yedek';
+const COL_ICON = ['🌙', '🔋', '💻', '📌', '📱', '🌆', '💤', '🏖️', '🤒'];
+const GUN_ = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+function isMgr_(req) { const me = auth_(req.token); return me && me.r === 'manager' ? me : null; }
+function readImg_(req) {
+  if (!isMgr_(req)) return { ok: false, err: 'auth' };
+  const key = PropertiesService.getScriptProperties().getProperty('GEMINI_KEY');
+  if (!key) return { ok: false, err: 'nokey' };
+  const imgs = (req.images || []).slice(0, 3), prompt = String(req.prompt || '').slice(0, 6000);
+  if (!imgs.length || !prompt) return { ok: false, err: 'bad' };
+  const parts = [{ text: prompt }];
+  imgs.forEach(function (b) { parts.push({ inline_data: { mime_type: 'image/jpeg', data: String(b) } }); });
+  const body = JSON.stringify({ contents: [{ role: 'user', parts: parts }], generationConfig: { temperature: 0, responseMimeType: 'application/json' } });
+  const models = ['gemini-2.5-pro', 'gemini-2.5-flash'];
+  let err = 'ai';
+  for (let i = 0; i < models.length; i++) {
+    let r;
+    try {
+      r = UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models/' + models[i] + ':generateContent',
+        { method: 'post', contentType: 'application/json', headers: { 'x-goog-api-key': key }, payload: body, muteHttpExceptions: true });
+    } catch (e) { err = 'net'; continue; }
+    const code = r.getResponseCode();
+    if (code === 429) { err = 'quota'; continue; }
+    if (code !== 200) { err = (code === 400 || code === 403) && i === 0 && /API key/i.test(r.getContentText()) ? 'nokey' : 'ai'; if (err === 'nokey') return { ok: false, err: err }; continue; }
+    try {
+      const j = JSON.parse(r.getContentText());
+      let t = ((((j.candidates || [])[0] || {}).content || {}).parts || []).map(function (p) { return p.text || ''; }).join('');
+      t = t.replace(/^\s*```(?:json)?/i, '').replace(/```\s*$/, '');
+      return { ok: true, data: JSON.parse(t), model: models[i] };
+    } catch (e) { err = 'json'; }
+  }
+  return { ok: false, err: err };
+}
+function cellText_(i, line) {
+  const names = String(line || '').split(',').map(function (x) { return x.trim().replace(/\s*\(/, ' ('); }).filter(Boolean);
+  return names.length ? COL_ICON[i] + ' ' + names.join(', ') : '';
+}
+function applyRoster_(req) {
+  if (!isMgr_(req)) return { ok: false, err: 'auth' };
+  const rows = req.rows || {}, dates = Object.keys(rows).sort();
+  if (!dates.length || dates.length > 400) return { ok: false, err: 'bad' };
+  const parsed = {};
+  for (let i = 0; i < dates.length; i++) {
+    const d = dates[i], p = String(rows[d]).split('|');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || p.length !== 10 || p[0] !== d) return { ok: false, err: 'bad' };
+    parsed[d] = p.slice(1, 10).map(function (x, k) { return cellText_(k, x.slice(0, 300)); });
+  }
+  const lock = LockService.getScriptLock(); lock.waitLock(30000);
+  try {
+    const ss = ss_(), sh = ss.getSheetByName(ROSTER_TAB); if (!sh) return { ok: false, err: 'nosheet' };
+    const old = ss.getSheetByName(BACKUP_TAB); if (old) ss.deleteSheet(old);
+    const bk = sh.copyTo(ss); bk.setName(BACKUP_TAB); bk.hideSheet();
+    const disp = sh.getDataRange().getDisplayValues(), at = {}, lastCol = Math.max(11, sh.getLastColumn());
+    let lastDateRow = 1;
+    const order = [];
+    for (let i = 1; i < disp.length; i++) {
+      const m = String(disp[i][0]).trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/); if (!m) continue;
+      const iso = m[3] + '-' + pad_(+m[2]) + '-' + pad_(+m[1]); at[iso] = i + 1; lastDateRow = i + 1; order.push(iso);
+    }
+    let written = 0;
+    dates.forEach(function (d) {
+      let row = at[d];
+      if (!row) {
+        // new date: insert in order, copying the look of the row above
+        const prevKeys = order.filter(function (k) { return k < d; }), after = prevKeys.length ? prevKeys[prevKeys.length - 1] : null;
+        const prevRow = after ? at[after] : lastDateRow;
+        const y = +d.slice(0, 4), mo = +d.slice(5, 7), dd = +d.slice(8, 10), dt = new Date(y, mo - 1, dd, 12);
+        const wk = function (k) { const g = new Date(+k.slice(0, 4), +k.slice(5, 7) - 1, +k.slice(8, 10), 12).getDay(); return g === 0 || g === 6; };
+        const same = order.filter(function (k) { return k !== d && wk(k) === wk(d); }).sort(), src = same.length ? Math.max.apply(null, [at[same.filter(function (k) { return k < d; }).pop() || same[0]]]) : prevRow;
+        sh.insertRowAfter(prevRow); row = prevRow + 1;
+        const srcRow = src > prevRow ? src + 1 : src;
+        sh.getRange(srcRow, 1, 1, lastCol).copyTo(sh.getRange(row, 1, 1, lastCol), SpreadsheetApp.CopyPasteType.PASTE_FORMAT, false);
+        sh.getRange(row, 1).setValue(dt);
+        sh.getRange(row, 2).setValue(GUN_[dt.getDay()]);
+        Object.keys(at).forEach(function (k) { if (at[k] >= row) at[k]++; });
+        at[d] = row; order.push(d); order.sort(); lastDateRow++;
+      }
+      sh.getRange(row, 3, 1, 9).setValues([parsed[d]]); written++;
+    });
+    SpreadsheetApp.flush();
+  } finally { lock.releaseLock(); }
+  const n = syncRoster_();
+  return { ok: true, written: dates.length, days: n };
+}
+function undoRoster_(req) {
+  if (!isMgr_(req)) return { ok: false, err: 'auth' };
+  const lock = LockService.getScriptLock(); lock.waitLock(30000);
+  try {
+    const ss = ss_(), sh = ss.getSheetByName(ROSTER_TAB), bk = ss.getSheetByName(BACKUP_TAB);
+    if (!sh || !bk) return { ok: false, err: 'nobackup' };
+    const v = bk.getDataRange().getValues();
+    sh.getDataRange().clearContent();
+    sh.getRange(1, 1, v.length, v[0].length).setValues(v);
+    SpreadsheetApp.flush();
+  } finally { lock.releaseLock(); }
+  syncRoster_();
+  return { ok: true };
 }
 
 /* ---------- hourly sync ---------- */
@@ -287,4 +390,11 @@ function makeCodes() {
     else sh.appendRow([w[0], w[1], gen(w[2])]);
   });
   return 'codes: ' + readCodes_().length;
+}
+
+/** Run once from the editor after adding GEMINI_KEY: asks Google for the external-request permission. */
+function authorize() {
+  const k = PropertiesService.getScriptProperties().getProperty('GEMINI_KEY');
+  const r = UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + encodeURIComponent(k || 'x'), { muteHttpExceptions: true });
+  return r.getResponseCode() === 200 ? 'Gemini key works' : 'Permission OK, but key problem: HTTP ' + r.getResponseCode();
 }

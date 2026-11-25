@@ -253,6 +253,7 @@ table.pg{border-collapse:separate; border-spacing:2px; width:100%; min-width:560
 .up-row{display:flex; flex-wrap:wrap; align-items:center; gap:8px}
 .panel{display:grid; gap:12px; padding:14px; border-radius:var(--r); background:var(--surface); box-shadow:inset 0 0 0 1px var(--line)}
 .chips{display:flex; flex-wrap:wrap; gap:6px}
+.mini.bad{outline:1px solid var(--bad,#c0392b)}
 .mini{display:inline-flex; gap:6px; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:600; font-variant-numeric:tabular-nums}
 
 /* next-week requests */
@@ -405,6 +406,29 @@ table.pg{border-collapse:separate; border-spacing:2px; width:100%; min-width:560
     <p class="hint" data-i18n="patReqHint"></p>
     <div class="up-row"><button type="button" class="btn" id="patAll"></button></div>
     <div id="patReqs"></div>
+    <div id="upBlock" class="block">
+      <h2 data-i18n="upTitle"></h2>
+      <p class="hint" data-i18n="upHint"></p>
+      <div class="up-row">
+        <button type="button" class="chip" id="upPick" data-i18n="upChoose"></button>
+        <input class="vh" type="file" id="roFile" accept="image/*" multiple tabindex="-1">
+        <span class="hint" id="upChosen"></span>
+      </div>
+      <div class="up-row">
+        <button type="button" class="btn" id="upRead" data-i18n="upRead" disabled></button>
+              </div>
+      <p class="hint" id="upStatus" role="status" hidden></p>
+      <div class="panel" id="upPreview" hidden>
+        <p id="upSummary"></p>
+        <div class="note" id="upWarn" hidden></div>
+        <div id="upList" class="up-list"></div>
+        <div class="up-row">
+          <button type="button" class="btn" id="upPublish" data-i18n="upPublish"></button>
+          <button type="button" class="btn ghost" id="upCancel" data-i18n="upCancel"></button>
+        </div>
+      </div>
+      <div class="up-row"><button type="button" class="chip" id="upUndo" data-i18n="upUndo"></button></div>
+    </div>
     <div id="depBox" class="block" hidden>
       <h2 data-i18n="depTitle"></h2>
       <p class="hint" data-i18n="depHint"></p>
@@ -424,31 +448,6 @@ table.pg{border-collapse:separate; border-spacing:2px; width:100%; min-width:560
     <h2 data-i18n="admTitle"></h2>
     <p class="hint" id="admSub"></p>
     <div class="adm" id="admList"></div>
-  </section>
-
-  <section class="block" id="upBlock" hidden>
-    <h2 data-i18n="upTitle"></h2>
-    <p class="hint" data-i18n="upHint"></p>
-    <div class="up-row">
-      <button type="button" class="chip" id="upPick" data-i18n="upChoose"></button>
-      <input class="vh" type="file" id="roFile" accept="image/*" multiple tabindex="-1">
-      <span class="hint" id="upChosen"></span>
-    </div>
-    <div class="up-row">
-      <button type="button" class="btn" id="upRead" data-i18n="upRead" disabled></button>
-      <button type="button" class="btn ghost" id="upStop" data-i18n="upStop" hidden></button>
-    </div>
-    <p class="hint" id="upStatus" role="status" hidden></p>
-    <div class="panel" id="upPreview" hidden>
-      <p id="upSummary"></p>
-      <div class="note" id="upWarn" hidden></div>
-      <div id="upMine" class="block"></div>
-      <div class="up-row">
-        <button type="button" class="btn" id="upPublish" data-i18n="upPublish"></button>
-        <button type="button" class="btn ghost" id="upCancel" data-i18n="upCancel"></button>
-      </div>
-    </div>
-    <div class="up-row"><button type="button" class="chip" id="upUndo" data-i18n="upUndo" hidden></button></div>
   </section>
 
   <p class="foot" id="foot" hidden></p>
@@ -553,13 +552,13 @@ const V=(function(){
       offShort:'Off', annShort:'Leave', sickShort:'Sick', asOf:'Roster as of 12 Nov 2026 · Istanbul time',
       upAsOf:'Roster updated {d} from a picture · Istanbul time', langName:'Türkçe',
       upTitle:'Update the roster',
-      upHint:'Upload a roster picture. Claude reads it, and once you confirm, the new shifts replace the old ones for everyone.',
+      upHint:'Upload a photo or screenshot of the roster table. It is read by AI, you check the preview, and on confirm the rows are written into the spreadsheet (a backup is kept).',
       upChoose:'Choose picture', upChosen:'{n} selected', upRead:'Read picture', upStop:'Stop',
       upReading:'Reading the picture… this can take a minute.',
       upFound:'Found {n} days: {a} – {b}.', upChanged:'{n} differ from the current roster.',
       upWarnDays:'These days do not list every person exactly once, so the picture may have been misread: {d}.',
       upNewNames:'Names not seen before: {n}.', upMine:'Your shifts in this picture',
-      upPublish:'Publish for everyone', upCancel:'Cancel', upDone:'Roster updated for everyone.',
+      upPublish:'Publish for everyone', upCancel:'Cancel', upDone:'Spreadsheet updated ({n} days). Everyone sees it in a moment.', upSaving:'Writing to the spreadsheet…', upNew:'new', upDiff:'changed', upSame:'same', upUndoSure:'Tap again to undo', upNoBackup:'No backup to restore.', upErrNoKey:'The Gemini key is not set in the script yet.', upErrAuth:'Manager sign-in needed.', upErrNet:'No connection or it took too long. Try again.',
       upUndo:'Undo last update', upUndone:'Last update undone.',
       upNoWrite:'You cannot publish for everyone from this account. Ask the owner for Contributor access.',
       upErrNoClaude:'Claude was not allowed for this page, so the picture cannot be read.',
@@ -598,13 +597,13 @@ const V=(function(){
       offShort:'İzin', annShort:'Yıllık', sickShort:'Rapor', asOf:'Çizelge: 12 Kasım 2026 · İstanbul saati',
       upAsOf:'Çizelge {d} tarihinde fotoğraftan güncellendi · İstanbul saati', langName:'English',
       upTitle:'Çizelgeyi güncelle',
-      upHint:'Çizelge fotoğrafı yükle. Claude okur, sen onaylayınca yeni vardiyalar herkes için eskilerin yerine geçer.',
+      upHint:'Çizelge fotoğrafı ya da ekran görüntüsü yükle. Yapay zekâ okur, önizlemeyi kontrol edersin, onaylayınca satırlar tabloya yazılır (yedek tutulur).',
       upChoose:'Fotoğraf seç', upChosen:'{n} seçildi', upRead:'Fotoğrafı oku', upStop:'Durdur',
       upReading:'Fotoğraf okunuyor… bir dakika sürebilir.',
       upFound:'{n} gün bulundu: {a} – {b}.', upChanged:'{n} tanesi mevcut çizelgeden farklı.',
       upWarnDays:'Bu günlerde herkes tam bir kez geçmiyor, fotoğraf yanlış okunmuş olabilir: {d}.',
       upNewNames:'Daha önce görülmeyen isimler: {n}.', upMine:'Bu fotoğraftaki vardiyaların',
-      upPublish:'Herkes için yayınla', upCancel:'Vazgeç', upDone:'Çizelge herkes için güncellendi.',
+      upPublish:'Herkes için yayınla', upCancel:'Vazgeç', upDone:'Tablo güncellendi ({n} gün). Herkes birazdan görür.', upSaving:'Tabloya yazılıyor…', upNew:'yeni', upDiff:'değişti', upSame:'aynı', upUndoSure:'Geri almak için tekrar dokun', upNoBackup:'Geri yüklenecek yedek yok.', upErrNoKey:'Gemini anahtarı henüz betiğe girilmemiş.', upErrAuth:'Yönetici girişi gerekli.', upErrNet:'Bağlantı yok ya da çok uzun sürdü. Tekrar dene.',
       upUndo:'Son güncellemeyi geri al', upUndone:'Son güncelleme geri alındı.',
       upNoWrite:'Bu hesapla herkes için yayınlayamazsın. Sahibinden Katkıda bulunan (Contributor) erişimi iste.',
       upErrNoClaude:'Bu sayfanın Claude kullanmasına izin verilmedi, fotoğraf okunamıyor.',
@@ -829,17 +828,11 @@ const V=(function(){
   function show(which){
     const app=which==='app'; $('mgrGate').hidden=true; $('wGate').hidden=true;
     $('picker').hidden=which!=='picker'; $('app').hidden=!app;
-    ['hero','weekBlock','calBlock','totBlock','reqBlock','swapBlock','admBlock','upBlock','foot','patBlock'].forEach(id=>{ if(!app) $(id).hidden=true; });
+    ['hero','weekBlock','calBlock','totBlock','reqBlock','swapBlock','admBlock','foot','patBlock'].forEach(id=>{ if(!app) $(id).hidden=true; });
     if(app){ $('foot').hidden=false; }
   }
 
-  function renderUpload(){
-    const ok=!!(worker&&S&&LIM&&LIM.images&&!$('app').hidden);
-    $('upBlock').hidden=!ok;
-    if(!ok) return;
-    $('roFile').accept=(LIM.images.mediaTypes||[]).join(',')||'image/*';
-    $('upUndo').hidden=!(DBR&&cur);
-  }
+  function renderUpload(){}
 
   function renderApp(){
     renderStatic();
@@ -1000,14 +993,14 @@ const V=(function(){
     const el=$('upStatus'); el.textContent=msg||''; el.className=isErr?'note':'hint'; el.hidden=!msg;
   }
   function setBusy(b){
-    $('upRead').disabled=b||!files.length; $('upStop').hidden=!b; $('upPick').disabled=b;
+    $('upRead').disabled=b||!files.length; $('upPick').disabled=b;
   }
-  function errCopy(e){
-    const c=e&&e.code;
-    if(c==='not_granted'||c==='sampling_disabled'||c==='not_declared'||c==='capability_disabled') return t('upErrNoClaude');
-    if(c==='rate_limited') return t('upErrRate');
-    if(c==='invalid_json'||c==='refused'||c==='empty_completion') return t('upErrJson');
-    if(c==='image_rejected'||c==='images_unavailable') return t('upErrImage');
+  function errCopy(code){
+    if(code==='nokey') return t('upErrNoKey');
+    if(code==='auth'||code==='forbidden') return t('upErrAuth');
+    if(code==='quota') return t('upErrRate');
+    if(code==='json'||code==='ai') return t('upErrJson');
+    if(code==='net') return t('upErrNet');
     return t('upErrGeneric');
   }
   function buildPrompt(){
@@ -1037,54 +1030,65 @@ const V=(function(){
     if(p.chk.bad.length) w.push(t('upWarnDays',{d:p.chk.bad.map(k=>dfmt(k,{day:'numeric',month:'short'})).join(', ')}));
     if(p.chk.unknown.length) w.push(t('upNewNames',{n:p.chk.unknown.join(', ')}));
     const wb=$('upWarn'); wb.textContent=w.join(' '); wb.hidden=!w.length;
+    const bad=new Set(p.chk.bad);
     const chips=Object.keys(p.rows).sort().map(k=>{
-      const e=V.entryOf(V.parseLine(p.rows[k]),worker);
-      return '<span class="mini '+kindClass(e)+'">'+(+k.slice(8))+' · '+esc(shortLabel(e)||'–')+'</span>';
+      const od=V.BY[k], nd=V.parseLine(p.rows[k]);
+      const st=!od?t('upNew'):(V.sig(nd)!==V.sig(od)?t('upDiff'):t('upSame'));
+      return '<span class="mini'+(bad.has(k)?' bad':'')+'">'+esc(dfmt(k,{day:'numeric',month:'short'}))+' · '+esc(st)+(bad.has(k)?' ⚠':'')+'</span>';
     }).join('');
-    $('upMine').innerHTML='<span class="eyebrow">'+esc(t('upMine'))+' · '+esc(worker)+'</span><div class="chips">'+chips+'</div>';
+    $('upList').innerHTML='<div class="chips">'+chips+'</div>';
     $('upPreview').hidden=false;
   }
+  function loadImg(file){
+    return new Promise((res,rej)=>{
+      const u=URL.createObjectURL(file), im=new Image();
+      im.onload=()=>{ URL.revokeObjectURL(u); res(im); };
+      im.onerror=()=>{ URL.revokeObjectURL(u); rej(new Error('img')); };
+      im.src=u;
+    });
+  }
+  async function shrink(file){
+    const im=await loadImg(file), M=2400, k=Math.min(1,M/Math.max(im.naturalWidth,im.naturalHeight));
+    const c=document.createElement('canvas'); c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k);
+    const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(im,0,0,c.width,c.height);
+    return c.toDataURL('image/jpeg',0.88).split(',')[1];
+  }
   async function readPicture(){
-    if(!S||!files.length) return;
-    ctl=new AbortController(); setBusy(true); parsed=null; $('upPreview').hidden=true;
+    if(!files.length) return;
+    setBusy(true); parsed=null; $('upPreview').hidden=true;
     status(t('upReading'));
     try{
-      const data=await S.json(buildPrompt(),{
-        images:files, modelTier:'complex', signal:ctl.signal,
-        onText:({text})=>{const n=(text.match(/"date"/g)||[]).length; status(t('upReading')+(n?' '+n:''));}
-      });
-      const res=toParsed(data);
+      const imgs=[]; for(const f of files) imgs.push(await shrink(f));
+      const r=await api({a:'readimg',images:imgs,prompt:buildPrompt()},200000);
+      if(!r.ok){ status(errCopy(r.err),true); return; }
+      const res=toParsed(r.data);
       if(!res.count){ status(t('upErrEmpty'),true); return; }
       parsed=res; renderPreview(res); status('');
-    }catch(e){
-      if(e&&e.code==='cancelled') status(''); else status(errCopy(e),true);
-    }finally{ setBusy(false); ctl=null; }
+    }catch(e){ status(t('upErrGeneric'),true); }
+    finally{ setBusy(false); }
   }
   async function publishRoster(){
     if(!parsed) return;
-    if(!DBR||canWrite===false){ status(t('upNoWrite'),true); return; }
-    $('upPublish').disabled=true;
+    $('upPublish').disabled=true; status(t('upSaving'));
     try{
-      const iso=new Date().toISOString(), old=cur;
-      await DBR.doc('roster/previous').set(old?{rows:old.rows||{},updatedAt:old.updatedAt||iso,days:old.days||0}:{empty:true,updatedAt:iso});
-      const merged=Object.assign({},old&&old.rows?old.rows:{},parsed.rows);
-      await DBR.doc('roster/current').set({rows:merged,updatedAt:iso,days:Object.keys(merged).length});
+      const r=await api({a:'applyroster',rows:parsed.rows},120000);
+      if(!r.ok){ status(errCopy(r.err),true); return; }
       parsed=null; files=[]; $('roFile').value=''; $('upChosen').textContent=''; $('upRead').disabled=true; $('upPreview').hidden=true;
-      status(t('upDone'));
-    }catch(e){
-      status(e&&e.code==='invalid_argument'?t('upNoWrite'):t('upErrWrite'),true);
-    }finally{ $('upPublish').disabled=false; }
+      status(t('upDone',{n:r.written||0})); await pollNow(true); if(PAT) renderPat();
+    }catch(e){ status(t('upErrWrite'),true); }
+    finally{ $('upPublish').disabled=false; }
   }
+  let undoArm=0;
   async function undoRoster(){
-    if(!DBR||!cur) return;
-    $('upUndo').disabled=true;
+    const b=$('upUndo');
+    if(!undoArm){ undoArm=setTimeout(()=>{ undoArm=0; b.textContent=t('upUndo'); },5000); b.textContent=t('upUndoSure'); return; }
+    clearTimeout(undoArm); undoArm=0; b.textContent=t('upUndo'); b.disabled=true;
     try{
-      if(prev&&!prev.empty&&prev.rows) await DBR.doc('roster/current').set({rows:prev.rows,updatedAt:prev.updatedAt||new Date().toISOString(),days:prev.days||Object.keys(prev.rows).length});
-      else await DBR.doc('roster/current').delete();
-      await DBR.doc('roster/previous').delete();
-      status(t('upUndone'));
-    }catch(e){ status(e&&e.code==='invalid_argument'?t('upNoWrite'):t('upErrWrite'),true); }
-    finally{ $('upUndo').disabled=false; }
+      const r=await api({a:'undoroster'},120000);
+      if(!r.ok){ status(r.err==='nobackup'?t('upNoBackup'):errCopy(r.err),true); return; }
+      status(t('upUndone')); await pollNow(true); if(PAT) renderPat();
+    }catch(e){ status(t('upErrWrite'),true); }
+    finally{ b.disabled=false; }
   }
 
   /* ---------- boss (patron) view ---------- */
@@ -1360,9 +1364,9 @@ const V=(function(){
   function renderStaticLite2(){ document.querySelectorAll('#mgrGate [data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n);}); }
   /* ---------- server access (Google Apps Script) ---------- */
   const API=String(window.VARDIYA_API||'').trim();
-  async function api(body){
+  async function api(body,ms){
     if(!API) return {ok:false,err:'noapi'};
-    const ctl=new AbortController(), to=setTimeout(()=>ctl.abort(),25000);
+    const ctl=new AbortController(), to=setTimeout(()=>ctl.abort(),ms||25000);
     try{
       const res=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({token:TOKEN},body)),signal:ctl.signal});
       return await res.json();
@@ -1540,7 +1544,7 @@ const V=(function(){
   $('reqSubmit').addEventListener('click',submitReq);
   $('upPick').addEventListener('click',()=>$('roFile').click());
   $('roFile').addEventListener('change',()=>{
-    const list=[...($('roFile').files||[])], max=(LIM&&LIM.images&&LIM.images.maxCount)||5;
+    const list=[...($('roFile').files||[])], max=3;
     parsed=null; $('upPreview').hidden=true;
     if(list.length>max){ files=[]; $('roFile').value=''; $('upChosen').textContent=''; $('upRead').disabled=true; status(t('upTooMany',{n:max}),true); return; }
     files=list; status('');
@@ -1548,7 +1552,6 @@ const V=(function(){
     $('upRead').disabled=!files.length;
   });
   $('upRead').addEventListener('click',readPicture);
-  $('upStop').addEventListener('click',()=>{ if(ctl) ctl.abort(); });
   $('upPublish').addEventListener('click',publishRoster);
   $('upCancel').addEventListener('click',()=>{ parsed=null; $('upPreview').hidden=true; status(''); });
   $('upUndo').addEventListener('click',undoRoster);
