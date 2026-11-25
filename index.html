@@ -1182,9 +1182,14 @@ const V=(function(){
       const tr=document.createElement('tr'), th=document.createElement('th'); th.className='nm'; th.textContent=name;
       const rw=document.createElement('select'); rw.className='rw'; rw.setAttribute('aria-label',name+' · '+t('rowMore'));
       const r0=document.createElement('option'); r0.value=''; r0.textContent=t('rowMore'); rw.appendChild(r0);
-      ['s0','s1','s2','s3','s4','s5','off','ann'].forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=t('rowAll',{x:codeFull(c)}); rw.appendChild(o); });
-      [['copy',t('rowCopy')],['clear',t('rowClear')]].forEach(a=>{ const o=document.createElement('option'); o.value=a[0]; o.textContent=a[1]; rw.appendChild(o); });
-      rw.addEventListener('change',()=>{ const m=rw.value; rw.value=''; if(m) patRowSet(name,days,m); });
+      const weeks=[]; for(let i=0;i<days.length;i+=7) weeks.push(days.slice(i,i+7));
+      weeks.forEach((wd,wi)=>{
+        const g=weeks.length>1?document.createElement('optgroup'):rw;
+        if(weeks.length>1){ g.label=dfmt(wd[0],{day:'numeric',month:'short'})+' – '+dfmt(wd[6],{day:'numeric',month:'short'}); rw.appendChild(g); }
+        ['s0','s1','s2','s3','s4','s5','off','ann'].forEach(c=>{ const o=document.createElement('option'); o.value=wi+':'+c; o.textContent=t('rowAll',{x:codeFull(c)}); g.appendChild(o); });
+        [['copy',t('rowCopy')],['clear',t('rowClear')]].forEach(a=>{ const o=document.createElement('option'); o.value=wi+':'+a[0]; o.textContent=a[1]; g.appendChild(o); });
+      });
+      rw.addEventListener('change',()=>{ const v=rw.value; rw.value=''; if(!v) return; const [wi,m]=v.split(':'); patRowSet(name,days.slice(+wi*7,+wi*7+7),m); });
       th.appendChild(rw); tr.appendChild(th);
       days.forEach(d=>{
         const c=codeOf(V.entry(d,name)), td=document.createElement('td'), sl=document.createElement('select'); if(d===days[7]) td.className='wk2';
