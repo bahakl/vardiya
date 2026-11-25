@@ -158,6 +158,11 @@ section{min-width:0}
 .cal-head{display:flex; justify-content:space-between; align-items:center; gap:8px}
 .monthnav{display:flex; align-items:center; gap:6px}
 .monthnav .chip{min-width:40px; padding:0}
+.pmode{display:inline-flex; gap:4px; margin-right:8px}
+.pmode .chip{min-width:64px; padding:0 10px}
+.pmode .chip.on{background:var(--accent); color:#fff; border-color:var(--accent)}
+.pg.pm th{font-size:10px; padding:4px 0}
+.pg.pm select.pc{min-width:40px; height:30px; font-size:10px; padding:0}
 #monthLbl{min-width:112px; text-align:center; font-size:13px; font-weight:600; text-transform:capitalize}
 .dow,.grid{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px}
 .dow span{text-align:center; font-size:10.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--muted)}
@@ -397,6 +402,7 @@ table.pg{border-collapse:separate; border-spacing:2px; width:100%; min-width:560
     <div class="cal-head">
       <h2 data-i18n="patGrid"></h2>
       <div class="monthnav">
+        <span class="pmode" id="patMode"><button type="button" class="chip" data-pm="week" data-i18n="pmWeek"></button><button type="button" class="chip" data-pm="month" data-i18n="pmMonth"></button></span>
         <button type="button" class="chip" id="patPrev" aria-label="Previous week">‹</button>
         <span id="patWeekLbl"></span>
         <button type="button" class="chip" id="patNext" aria-label="Next week">›</button>
@@ -574,7 +580,7 @@ const V=(function(){
       swTitle:'Swap shifts', swHint:'Pick your shift, a colleague, and what they give back. When they accept, the roster updates.', swSend:'Send swap request', swPickDay:'Your shift…', swPickWho:'Colleague (by hours that day)…', swTake:'Just take over (no return shift)', swSame:'Same day swap: {x}', swNeed:'Choose your shift and a colleague.', swSent:'Request sent.', swErr:'Could not save. Try again.',
       swAccept:'Accept', swDecline:'Decline', swCancel:'Cancel', swIn:'{a} asks you: {d} you take {x}{back}', swBack:', you give {x} on {y}', swOut:'You → {b}: you give {x} on {d}{back}', swBack2:', you get {x} on {y}', swSt_open:'Waiting for colleague', swSt_accepted:'Accepted', swSt_declined:'Declined', swSt_cancelled:'Cancelled', swSt_approved:'Done – roster updated', swSt_rejected:'Rejected', swSt_stale:'Roster changed — redo',
       swPatTitle:'Shift swaps', swPatHint:'Swaps need no approval: when the colleague accepts, the roster updates by itself. This list is for information.', swPatNone:'No upcoming swaps.', swLine:'{a} ⇄ {b}: {x} on {d}{back}',
-      rowMore:'Whole week…', rowAll:'Week: {x}', rowCopy:'Same as last week', rowClear:'Clear week',
+      pmWeek:'Week', pmMonth:'Month', rowMore:'Whole week…', rowAll:'Week: {x}', rowCopy:'Same as last week', rowClear:'Clear week',
       mgrTitle:'Manager access', mgrHint:'Enter the manager login code.', mgrUnlock:'Unlock', mgrCancel:'Cancel', mgrBad:'This is not a manager code.', mgrWait:'The list is still loading. Try again in a moment.', mgrNoHash:'This browser cannot check the number.',
       depTitle:'Deputy managers', depHint:'While you are away, appoint a worker to manage. Enter their phone number without +90 and the last day.', depAdd:'Appoint', depNone:'No deputies.', depRemove:'Remove', depEnded:'ended', depUntil:'until {d}', depBadPhone:'Enter a full phone number (10 digits, without +90).', depBadDate:'Pick the last day.', patLock:'Log out',
       patOpen:'Manager', patTitle:'Manager', patBack:'Back', patGrid:'Roster', patGridHint:'Tap a cell to change that worker’s shift. Changes are saved at once and everyone sees them.',
@@ -619,7 +625,7 @@ const V=(function(){
       swTitle:'Çalışma saati değişimi', swHint:'Kendi çalışma saatini, bir arkadaşı ve karşılığını seç. Arkadaşın kabul edince çizelge güncellenir.', swSend:'Değişim isteği gönder', swPickDay:'Çalışma saatin…', swPickWho:'Arkadaş (o günün saatine göre)…', swTake:'Sadece devral (karşılık yok)', swSame:'Aynı gün değişim: {x}', swNeed:'Çalışma saatini ve bir arkadaşı seç.', swSent:'İstek gönderildi.', swErr:'Kaydedilemedi. Tekrar dene.',
       swAccept:'Kabul et', swDecline:'Reddet', swCancel:'İptal', swIn:'{a} sana soruyor: {d} günü {x} çalışma saatini sen alırsın{back}', swBack:', sen {y} günü {x} verirsin', swOut:'Sen → {b}: {d} günü {x} verirsin{back}', swBack2:', {y} günü {x} alırsın', swSt_open:'Arkadaş bekleniyor', swSt_accepted:'Kabul edildi', swSt_declined:'Reddedildi', swSt_cancelled:'İptal edildi', swSt_approved:'Tamam – çizelge güncellendi', swSt_rejected:'Yönetici reddetti', swSt_stale:'Çizelge değişti — yeniden iste',
       swPatTitle:'Çalışma saati değişimleri', swPatHint:'Değişim için onay gerekmez: arkadaş kabul edince çizelge kendiliğinden güncellenir. Bu liste sadece bilgi içindir.', swPatNone:'Yaklaşan değişim yok.', swLine:'{a} ⇄ {b}: {d} günü {x}{back}',
-      rowMore:'Tüm hafta…', rowAll:'Hafta: {x}', rowCopy:'Geçen haftayla aynı', rowClear:'Haftayı temizle',
+      pmWeek:'Hafta', pmMonth:'Ay', rowMore:'Tüm hafta…', rowAll:'Hafta: {x}', rowCopy:'Geçen haftayla aynı', rowClear:'Haftayı temizle',
       mgrTitle:'Manager girişi', mgrHint:'Yönetici giriş kodunu yaz.', mgrUnlock:'Aç', mgrCancel:'Vazgeç', mgrBad:'Bu kod yönetici kodu değil.', mgrWait:'Liste hâlâ yükleniyor. Biraz sonra tekrar dene.', mgrNoHash:'Bu tarayıcı numarayı kontrol edemiyor.',
       depTitle:'Vekil yöneticiler', depHint:'Yokken yönetmesi için bir çalışanı görevlendir. Telefon numarasını +90 olmadan ve son günü yaz.', depAdd:'Görevlendir', depNone:'Vekil yok.', depRemove:'Kaldır', depEnded:'bitti', depUntil:'{d} tarihine kadar', depBadPhone:'Telefon numarasını tam yaz (10 hane, +90 olmadan).', depBadDate:'Son günü seç.', patLock:'Çıkış yap',
       patOpen:'Manager', patTitle:'Manager', patBack:'Geri', patGrid:'Çizelge', patGridHint:'Bir hücreye dokunup o kişinin çalışma saatini değiştir. Değişiklik hemen kaydedilir, herkes görür.',
@@ -1096,6 +1102,8 @@ const V=(function(){
   /* ---------- boss (patron) view ---------- */
   let PAT=false, patOver=null, patStat=null, patWeek=null;
   const patMQ=window.matchMedia('(min-width:1100px)'), patWide=()=>patMQ.matches;
+  let patMon=null, patPM=(()=>{ try{ return localStorage.getItem('vardiya-pm')||'week'; }catch(e){ return 'week'; } })();
+  const patMonthly=()=>patWide()&&patPM==='month';
   patMQ.addEventListener&&patMQ.addEventListener('change',()=>{ if(PAT) renderPat(); });
   const COL={s0:1,s1:2,s2:3,s3:4,s4:5,s5:6,off:7,ann:8,sick:9};
   const PCODES=['','s0','s1','s2','s3','s4','s5','off','ann','sick'];
@@ -1171,12 +1179,25 @@ const V=(function(){
     const lo=mondayOf(first()), hi=mondayOf(last());
     if(!patWeek) patWeek=mondayOf(nowIst().date);
     if(patWeek<lo) patWeek=lo; if(patWeek>hi) patWeek=hi;
-    const nD=patWide()?14:7, days=Array.from({length:nD},(_,i)=>addDays(patWeek,i)), today=nowIst().date;
-    $('patWeekLbl').textContent=dfmt(days[0],{day:'numeric',month:'short'})+' – '+dfmt(days[nD-1],{day:'numeric',month:'short'});
-    $('patPrev').disabled=patWeek<=lo; $('patNext').disabled=patWeek>=hi;
-    const tb=$('patTable'); tb.innerHTML='';
+    const MM=patMonthly(), today=nowIst().date;
+    $('patMode').hidden=!patWide(); document.querySelectorAll('#patMode .chip').forEach(b=>b.classList.toggle('on',b.dataset.pm===(MM?'month':'week')));
+    let days;
+    if(MM){
+      const ms=months(); if(!patMon) patMon=(patWeek>today?patWeek:today).slice(0,7);
+      if(patMon<ms[0]) patMon=ms[0]; if(patMon>ms[ms.length-1]) patMon=ms[ms.length-1];
+      const y=+patMon.slice(0,4), m=+patMon.slice(5,7), n=new Date(Date.UTC(y,m,0)).getUTCDate();
+      days=Array.from({length:n},(_,i)=>patMon+'-'+String(i+1).padStart(2,'0'));
+      $('patWeekLbl').textContent=dfmt(days[0],{month:'long',year:'numeric'});
+      $('patPrev').disabled=patMon<=ms[0]; $('patNext').disabled=patMon>=ms[ms.length-1];
+    } else {
+      const nD=patWide()?14:7; days=Array.from({length:nD},(_,i)=>addDays(patWeek,i));
+      $('patWeekLbl').textContent=dfmt(days[0],{day:'numeric',month:'short'})+' – '+dfmt(days[nD-1],{day:'numeric',month:'short'});
+      $('patPrev').disabled=patWeek<=lo; $('patNext').disabled=patWeek>=hi;
+    }
+    const sep=(d,i)=>MM?(i>0&&new Date(d+'T12:00:00Z').getUTCDay()===1):i===7;
+    const tb=$('patTable'); tb.innerHTML=''; tb.classList.toggle('pm',MM);
     const hr=document.createElement('tr'); hr.appendChild(document.createElement('th'));
-    days.forEach((d,i)=>{ const th=document.createElement('th'); th.className=(d===today?'today':'')+(i===7?' wk2':''); th.textContent=dfmt(d,{weekday:'short'})+' '+(+d.slice(8))+(patOver&&patOver.rows&&patOver.rows[d]?' •':''); hr.appendChild(th); });
+    days.forEach((d,i)=>{ const th=document.createElement('th'); th.className=(d===today?'today':'')+(sep(d,i)?' wk2':''); th.textContent=dfmt(d,{weekday:'short'})+' '+(+d.slice(8))+(patOver&&patOver.rows&&patOver.rows[d]?' •':''); hr.appendChild(th); });
     tb.appendChild(hr);
     V.WORKERS.filter(n=>V.DAYS.some(d=>d.date>='2026-11-01'&&V.entryOf(d,n).kind!=='none')).forEach(name=>{
       const tr=document.createElement('tr'), th=document.createElement('th'); th.className='nm'; th.textContent=name;
@@ -1190,11 +1211,11 @@ const V=(function(){
         [['copy',t('rowCopy')],['clear',t('rowClear')]].forEach(a=>{ const o=document.createElement('option'); o.value=wi+':'+a[0]; o.textContent=a[1]; g.appendChild(o); });
       });
       rw.addEventListener('change',()=>{ const v=rw.value; rw.value=''; if(!v) return; const [wi,m]=v.split(':'); patRowSet(name,days.slice(+wi*7,+wi*7+7),m); });
-      th.appendChild(rw); tr.appendChild(th);
-      days.forEach(d=>{
-        const c=codeOf(V.entry(d,name)), td=document.createElement('td'), sl=document.createElement('select'); if(d===days[7]) td.className='wk2';
+      if(!MM) th.appendChild(rw); tr.appendChild(th);
+      days.forEach((d,i)=>{
+        const c=codeOf(V.entry(d,name)), td=document.createElement('td'), sl=document.createElement('select'); if(sep(d,i)) td.className='wk2';
         sl.className='pc '+codeClass(c); sl.title=name+' · '+dfmt(d,{weekday:'long',day:'numeric',month:'long'});
-        PCODES.forEach(x=>{ const o=document.createElement('option'); o.value=x; o.textContent=codeShort(x); o.title=codeFull(x); sl.appendChild(o); });
+        PCODES.forEach(x=>{ const o=document.createElement('option'); o.value=x; o.textContent=MM&&/^s\d$/.test(x)?SHIFT_LBL[+x[1]]:codeShort(x); o.title=codeFull(x); sl.appendChild(o); });
         sl.value=c;
         sl.addEventListener('change',()=>{ patSave({[d]:lineWith(d,name,sl.value)}); });
         td.appendChild(sl); tr.appendChild(td);
@@ -1536,8 +1557,10 @@ const V=(function(){
   $('swMine').addEventListener('click',ev=>{ const b=ev.target.closest('button[data-sa]'); if(!b) return; const sw=swaps.find(x=>x.id===b.dataset.id); if(!sw) return; const st={accept:'accepted',decline:'declined',cancel:'cancelled'}[b.dataset.sa]; const note=$('swNote'); note.textContent='…'; b.disabled=true;
     (async()=>{ try{ let fin=st, patch=null; if(st==='accepted'){ patch=swPatch(sw); fin=patch?'approved':'stale'; } if(patch) await patSave(patch); await DBR.doc('swaps/'+sw.id).set(Object.assign({},sw,{status:fin,at:new Date().toISOString()})); note.textContent=(fin==='stale'?'':'✓ ')+t('swSt_'+fin); }catch(e){ note.textContent=t('swErr')+' ('+((e&&(e.code||e.message))||e)+')'; b.disabled=false; } })(); });
   $('patLang').addEventListener('click',()=>{ LANG=LANG==='en'?'tr':'en'; store.set('vardiya-lang',LANG); renderPat(); });
-  $('patPrev').addEventListener('click',()=>{ patWeek=addDays(patWeek,-7); renderPat(); });
-  $('patNext').addEventListener('click',()=>{ patWeek=addDays(patWeek,7); renderPat(); });
+  const monStep=k=>{ const y=+patMon.slice(0,4), m=+patMon.slice(5,7)-1+k, d=new Date(Date.UTC(y,m,1)); patMon=d.toISOString().slice(0,7); };
+  $('patPrev').addEventListener('click',()=>{ if(patMonthly()) monStep(-1); else patWeek=addDays(patWeek,-7); renderPat(); });
+  $('patMode').addEventListener('click',ev=>{ const b=ev.target.closest('[data-pm]'); if(!b) return; patPM=b.dataset.pm; try{ localStorage.setItem('vardiya-pm',patPM); }catch(e){} if(patPM==='month') patMon=null; renderPat(); });
+  $('patNext').addEventListener('click',()=>{ if(patMonthly()) monStep(1); else patWeek=addDays(patWeek,7); renderPat(); });
   $('patAll').addEventListener('click',()=>{ const wk=nextWeek(); patDecide(patList(wk).filter(e=>{const s=patState(e); return s==='pending'||s==='updated';}).map(e=>e.worker),true); });
   $('patReqs').addEventListener('click',ev=>{ const b=ev.target.closest('button[data-act]'); if(!b||b.disabled) return; patDecide([b.dataset.w],b.dataset.act==='ok'); });
   $('changeBtn').addEventListener('click',()=>{ show('picker'); renderPicker(); window.scrollTo(0,0); });
