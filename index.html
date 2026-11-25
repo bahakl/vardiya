@@ -205,6 +205,8 @@ section{min-width:0}
   .pg-wrap{overflow-x:auto}
 }
 @media (min-width:1400px){ .wrap{max-width:1240px} .wrap.pat{max-width:1240px} }
+@media (min-width:1100px){ .wrap.pat{max-width:min(1700px,100%)} }
+.pg .wk2{border-left:3px solid var(--line); padding-left:4px}
 .pat-head{display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap}
 .pat-head h1{font:600 28px/1.1 var(--display)}
 .pg-wrap{overflow-x:auto; border-radius:var(--rs); box-shadow:inset 0 0 0 1px var(--line)}
@@ -1093,6 +1095,8 @@ const V=(function(){
 
   /* ---------- boss (patron) view ---------- */
   let PAT=false, patOver=null, patStat=null, patWeek=null;
+  const patMQ=window.matchMedia('(min-width:1100px)'), patWide=()=>patMQ.matches;
+  patMQ.addEventListener&&patMQ.addEventListener('change',()=>{ if(PAT) renderPat(); });
   const COL={s0:1,s1:2,s2:3,s3:4,s4:5,s5:6,off:7,ann:8,sick:9};
   const PCODES=['','s0','s1','s2','s3','s4','s5','off','ann','sick'];
   const codeOf=e=>e.kind==='shift'?'s'+e.i:e.kind==='off'?'off':e.kind==='annual'?'ann':e.kind==='sick'?'sick':'';
@@ -1167,12 +1171,12 @@ const V=(function(){
     const lo=mondayOf(first()), hi=mondayOf(last());
     if(!patWeek) patWeek=mondayOf(nowIst().date);
     if(patWeek<lo) patWeek=lo; if(patWeek>hi) patWeek=hi;
-    const days=[0,1,2,3,4,5,6].map(i=>addDays(patWeek,i)), today=nowIst().date;
-    $('patWeekLbl').textContent=dfmt(days[0],{day:'numeric',month:'short'})+' – '+dfmt(days[6],{day:'numeric',month:'short'});
+    const nD=patWide()?14:7, days=Array.from({length:nD},(_,i)=>addDays(patWeek,i)), today=nowIst().date;
+    $('patWeekLbl').textContent=dfmt(days[0],{day:'numeric',month:'short'})+' – '+dfmt(days[nD-1],{day:'numeric',month:'short'});
     $('patPrev').disabled=patWeek<=lo; $('patNext').disabled=patWeek>=hi;
     const tb=$('patTable'); tb.innerHTML='';
     const hr=document.createElement('tr'); hr.appendChild(document.createElement('th'));
-    days.forEach(d=>{ const th=document.createElement('th'); th.className=d===today?'today':''; th.textContent=dfmt(d,{weekday:'short'})+' '+(+d.slice(8))+(patOver&&patOver.rows&&patOver.rows[d]?' •':''); hr.appendChild(th); });
+    days.forEach((d,i)=>{ const th=document.createElement('th'); th.className=(d===today?'today':'')+(i===7?' wk2':''); th.textContent=dfmt(d,{weekday:'short'})+' '+(+d.slice(8))+(patOver&&patOver.rows&&patOver.rows[d]?' •':''); hr.appendChild(th); });
     tb.appendChild(hr);
     V.WORKERS.filter(n=>V.DAYS.some(d=>d.date>='2026-11-01'&&V.entryOf(d,n).kind!=='none')).forEach(name=>{
       const tr=document.createElement('tr'), th=document.createElement('th'); th.className='nm'; th.textContent=name;
@@ -1183,7 +1187,7 @@ const V=(function(){
       rw.addEventListener('change',()=>{ const m=rw.value; rw.value=''; if(m) patRowSet(name,days,m); });
       th.appendChild(rw); tr.appendChild(th);
       days.forEach(d=>{
-        const c=codeOf(V.entry(d,name)), td=document.createElement('td'), sl=document.createElement('select');
+        const c=codeOf(V.entry(d,name)), td=document.createElement('td'), sl=document.createElement('select'); if(d===days[7]) td.className='wk2';
         sl.className='pc '+codeClass(c); sl.title=name+' · '+dfmt(d,{weekday:'long',day:'numeric',month:'long'});
         PCODES.forEach(x=>{ const o=document.createElement('option'); o.value=x; o.textContent=codeShort(x); o.title=codeFull(x); sl.appendChild(o); });
         sl.value=c;
